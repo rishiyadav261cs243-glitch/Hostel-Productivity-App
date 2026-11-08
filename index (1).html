@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hostel Productivity Predictor</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#2f5fd0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hostel Predictor">
+<style>
+:root{--bg:#f5f6fa;--card:#fff;--text:#1b2230;--muted:#5d6678;--line:#d9deea;--accent:#2f5fd0;--on:#fff;
+--low:#c0392b;--mid:#c27c0e;--high:#1e8a4c;--lowbg:#fbe9e7;--midbg:#fdf3dc;--highbg:#e5f5ec;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10141c;--card:#1a202c;--text:#e8ecf5;--muted:#9aa4b8;--line:#2e3647;--accent:#6c93f0;--on:#0d1117;
+--low:#ff8a7a;--mid:#f0b64a;--high:#58d08a;--lowbg:#3a1e1b;--midbg:#3a2e12;--highbg:#14301f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141c;--card:#1a202c;--text:#e8ecf5;--muted:#9aa4b8;--line:#2e3647;--accent:#6c93f0;--on:#0d1117;
+--low:#ff8a7a;--mid:#f0b64a;--high:#58d08a;--lowbg:#3a1e1b;--midbg:#3a2e12;--highbg:#14301f;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.45}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 32px}
+h1{font-size:1.4rem;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 16px;font-size:.95rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.q{margin-bottom:16px}.q:last-child{margin-bottom:0}
+.q b{display:block;margin-bottom:6px}
+.btns{display:flex;gap:6px}
+.btns button{flex:1;padding:11px 0;border:1px solid var(--line);background:transparent;color:var(--text);border-radius:10px;font-size:1rem;cursor:pointer}
+.btns button.on{background:var(--accent);border-color:var(--accent);color:var(--on);font-weight:600}
+.ends{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-top:4px}
+#res{border-radius:14px;padding:18px;border:2px solid var(--line);background:var(--card)}
+#res .lab{font-size:.85rem;color:var(--muted)}
+#res .big{font-size:1.9rem;font-weight:700;margin:2px 0 6px}
+#res.low{background:var(--lowbg);border-color:var(--low)}#res.low .big{color:var(--low)}
+#res.mid{background:var(--midbg);border-color:var(--mid)}#res.mid .big{color:var(--mid)}
+#res.high{background:var(--highbg);border-color:var(--high)}#res.high .big{color:var(--high)}
+#res p{margin:4px 0;font-size:.93rem}
+
+.head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.head img{width:52px;height:52px;border-radius:12px}
+.head h1{margin:0}.head .sub{margin:2px 0 0}
+.card{box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.share{margin-top:10px;padding:10px 16px;border-radius:10px;border:1px solid var(--accent);background:transparent;color:var(--accent);font-size:.95rem;font-weight:600;cursor:pointer}
+.tips{margin:8px 0 0;padding-left:18px;font-size:.93rem}
+h2{font-size:1.05rem;margin:0 0 4px}
+.cap{font-size:.8rem;color:var(--muted);margin:0 0 10px}
+.bar{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:.88rem}
+.bar span:first-child{width:96px;flex:none}
+.bar i{display:block;height:14px;border-radius:7px;background:var(--accent);min-width:3px}
+.bar span:last-child{color:var(--muted);flex:none}
+details summary{cursor:pointer;font-weight:600}
+details p,details li{font-size:.9rem}
+
+.page[hidden]{display:none}
+.wrap{padding-bottom:84px}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:5}
+.tabs button{flex:1;border:0;background:transparent;color:var(--muted);font-size:.72rem;padding:6px 0;cursor:pointer;border-radius:10px}
+.tabs button span{display:block;font-size:1.25rem;line-height:1.2}
+.tabs button.on{color:var(--accent);font-weight:700}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.row button{margin:0}
+.share.fill{background:var(--accent);color:var(--on)}
+.chip{display:inline-block;padding:6px 12px;border-radius:999px;font-size:.9rem;margin-bottom:8px}
+.chip.low{background:var(--lowbg);color:var(--low)}.chip.mid{background:var(--midbg);color:var(--mid)}.chip.high{background:var(--highbg);color:var(--high)}
+</style></head><body><div class="wrap">
+<div class="head"><img src="icon-192.png" alt=""><div><h1>Hostel Productivity Predictor</h1>
+<p class="sub">Choose your room conditions. The predicted study productivity updates instantly.</p></div></div>
+<section class="page" id="p-predict"><div class="card" id="form"></div><div id="res" aria-live="polite"></div></section>
+<section class="page" id="p-tips" hidden><div class="card" id="tbox"></div></section>
+<section class="page" id="p-insights" hidden><div class="card"><h2>What matters most to the model</h2>
+<p class="cap">Drop in macro-F1 when a factor is shuffled (higher = more important)</p>
+<div class="bar"><span>Interruptions</span><i style="width:100%"></i><span>0.222</span></div>
+<div class="bar"><span>Comfort</span><i style="width:95%"></i><span>0.212</span></div>
+<div class="bar"><span>Wi-Fi</span><i style="width:93%"></i><span>0.206</span></div>
+<div class="bar"><span>Noise</span><i style="width:77%"></i><span>0.172</span></div>
+<div class="bar"><span>Room sharing</span><i style="width:4%"></i><span>0.008</span></div>
+<p class="cap">The first four matter about equally. Room sharing adds nothing once they are known.</p></div>
+</section>
+<section class="page" id="p-about" hidden><div class="card"><h2>About this app</h2>
+<p>Project: Impact of Hostel Environment on Student Study Productivity<br>Course: Data Science with AI, NITK Surathkal<br>Made by Rishi Yadav (261CS243), Section 14, Computer Science<br>Guide: Dr. Aishwarya Balakrishnan</p>
+<p><b>How it works:</b> the final tuned SVM (C = 100, gamma = 0.01, balanced class weights) was run on all 1,250 possible answer combinations, and this page shows those exact predictions. Test accuracy 0.83, macro-F1 0.77; repeated cross-validation accuracy 0.81.</p>
+<ul><li>Data: survey of 634 hostel students (self-reported).</li><li>Mid is the model’s weakest class.</li><li>This is a screening tool, not a judgement on any student.</li><li>Built with help from an AI assistant (Claude).</li></ul></div></section>
+</div>
+<nav class="tabs"><button type="button" class="on" data-p="predict"><span>🏠</span>Predict</button><button type="button" data-p="tips"><span>💡</span>Tips</button><button type="button" data-p="insights"><span>📊</span>Insights</button><button type="button" data-p="about"><span>ℹ️</span>About</button></nav>
+<script>
+/*LOOKUP-START*/
+const P="11000210002210022000222002100022100222102222022222222002222022222222222222222222222222222222222222222222222222222222222222222100001100021000220002200010000210002210022210222202100022100222112222122222222002222022222222222222222222222222222222222222220000010000110002100022000100001100021000221002220010000210002211022211222212000022100222112222122222222002222022222222222222200000000001000010000200000000010000110002100022000000001000021000221002221000000210002211022211222212000022100222112222122222000000000000000000000000000000000001000010000200000000000000100002100022000000001000021000221102221100000210002211022211222211000021000221002220022220210002210022211222222222222000222212222222222222222222222222222222222222222222222222222222222222222210000110002100022100220001000021100221102221122221210002211022211222212222222000222212222222222222222222222222222222222222222000001000011000210002200010000110002110022100222001000021100221112221122221210002211122211222212222222200222212222222222222220000000000100001000020000000001000011000210002200000000110002110022110222111000021100221112221122221200002211122211222222222200000000000000000000000000000000000100001000020000000001000011000211002210000000100002110022111222110000021000221112221122221";
+const V="22222222222222222122222222222222222222222222122222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222122222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222122222222222222222222222222222222122222222222222222222222222222222222222222222222222222222222222222122222222222222222222222212222222222222222222222222122222222222222222222222222222222222222222222222222222222222222222222222222222212222222222222222222122222222222222222222222212222222222222222222222222222222222222222222222222222222222222222222222222222122222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222122222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222212222222222222222222222222222222222222222222222222212222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222221222222222222222222222222";
+function lookup(r,n,c,w,i){const k=r*625+(n-1)*125+(c-1)*25+(w-1)*5+(i-1);return{cls:+P[k],votes:+V[k]};}
+/*LOOKUP-END*/
+const Q=[
+{k:"r",t:"How many students share your room (including you)?",o:[["2",0],["3",1]]},
+{k:"n",t:"Room noise during study time",o:[1,2,3,4,5],e:["Very quiet","Very noisy"]},
+{k:"c",t:"Temperature and ventilation comfort",o:[1,2,3,4,5],e:["Very uncomfortable","Very comfortable"]},
+{k:"w",t:"Wi-Fi reliability",o:[1,2,3,4,5],e:["Very poor","Excellent"]},
+{k:"i",t:"Interruptions by roommates or others",o:[1,2,3,4,5],e:["Never","Very often"]}];
+const S={r:0,n:3,c:3,w:3,i:3};
+const form=document.getElementById("form"),res=document.getElementById("res"),tbox=document.getElementById("tbox");
+Q.forEach(q=>{
+const d=document.createElement("div");d.className="q";
+d.innerHTML="<b>"+q.t+"</b>";
+const row=document.createElement("div");row.className="btns";
+q.o.forEach(o=>{
+const label=Array.isArray(o)?o[0]:o,val=Array.isArray(o)?o[1]:o;
+const b=document.createElement("button");b.type="button";b.textContent=label;b.dataset.v=val;
+b.onclick=()=>{S[q.k]=val;paint();};
+row.appendChild(b);});
+d.appendChild(row);
+if(q.e){const e=document.createElement("div");e.className="ends";e.innerHTML="<span>1 = "+q.e[0]+"</span><span>5 = "+q.e[1]+"</span>";d.appendChild(e);}
+d.dataset.k=q.k;form.appendChild(d);});
+const NAMES=["Low","Mid","High"],CL=["low","mid","high"];
+const TIP=["","","These conditions support good study productivity."];
+
+function tips(cls){const out=[];
+[["n","Noise"],["c","Comfort"],["w","Wi-Fi"],["i","Interruptions"]].forEach(a=>{let best=null;
+for(let v=1;v<=5;v++){if(v===S[a[0]])continue;const T=Object.assign({},S,{[a[0]]:v});const y=lookup(T.r,T.n,T.c,T.w,T.i);
+if(y.cls>cls){const d=Math.abs(v-S[a[0]]);if(!best||d<best.d||(d===best.d&&y.cls>best.cls))best={v:v,d:d,cls:y.cls};}}
+if(best)out.push({name:a[1],from:S[a[0]],to:best.v,d:best.d,cls:best.cls});});
+out.sort((a,b)=>a.d-b.d||b.cls-a.cls);return out.slice(0,3);}
+function share(){const x=lookup(S.r,S.n,S.c,S.w,S.i),btn=document.getElementById("share");
+const t="Hostel Productivity Predictor: "+NAMES[x.cls]+" predicted productivity ("+(S.r?3:2)+" sharing, noise "+S.n+", comfort "+S.c+", Wi-Fi "+S.w+", interruptions "+S.i+").";
+if(navigator.share){navigator.share({title:"Hostel Productivity Predictor",text:t,url:location.href}).catch(()=>{});return;}
+const full=t+" "+location.href;
+(navigator.clipboard?navigator.clipboard.writeText(full):Promise.reject()).then(()=>{btn.textContent="Copied!";setTimeout(()=>{btn.textContent="Share result";},1500);}).catch(()=>{prompt("Copy this text:",full);});}
+function paintTips(){
+const x=lookup(S.r,S.n,S.c,S.w,S.i);
+let h='<span class="chip '+CL[x.cls]+'">Current result: <b>'+NAMES[x.cls]+'</b></span>';
+if(x.cls===2){h+="<p>"+TIP[2]+" Keep noise and interruptions low, and comfort and Wi-Fi high.</p>";}
+else{const t=tips(x.cls);
+if(t.length){h+="<p><b>What-if tips</b> (lower is better for noise and interruptions):</p><ul class=\"tips\">"+t.map(o=>"<li>"+o.name+": "+o.from+" → "+o.to+" gives "+NAMES[o.cls]+"</li>").join("")+"</ul>";}
+else{h+="<p>No single change is enough. Try improving two factors together.</p>";}}
+h+='<div class="row"><button type="button" class="share" id="back">← Change my answers</button></div>';
+tbox.innerHTML=h;document.getElementById("back").onclick=()=>showPage("predict");}
+function paint(){
+form.querySelectorAll(".q").forEach(d=>{
+d.querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.v===S[d.dataset.k]));});
+const x=lookup(S.r,S.n,S.c,S.w,S.i);
+res.className=CL[x.cls];
+let h='<div class="lab">Predicted study productivity</div><div class="big">'+NAMES[x.cls]+'</div>';
+h+="<p>"+(x.votes>=2?"Clear prediction: the model’s comparisons agree.":"Borderline: the model was undecided between classes, so treat this with care.")+"</p>";
+if(x.cls===1)h+="<p>Mid is the model’s least reliable class.</p>";
+h+='<div class="row"><button type="button" class="share fill" id="tipbtn">What-if tips →</button><button type="button" class="share" id="share">Share result</button></div>';
+res.innerHTML=h;
+document.getElementById("share").onclick=share;
+document.getElementById("tipbtn").onclick=()=>showPage("tips");}
+const PAGES=["predict","tips","insights","about"];
+function showPage(n){
+PAGES.forEach(p=>{document.getElementById("p-"+p).hidden=(p!==n);});
+document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.p===n));
+if(n==="tips")paintTips();
+window.scrollTo(0,0);}
+document.querySelectorAll(".tabs button").forEach(b=>{b.onclick=()=>showPage(b.dataset.p);});
+paint();
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+</script></body></html>
